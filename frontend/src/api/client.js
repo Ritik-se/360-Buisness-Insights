@@ -4,23 +4,8 @@ export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000",
 });
 
-export async function authStatus() {
-  const { data } = await api.get("/api/auth/status");
-  return data;
-}
-
 export async function signup(email, password) {
   const { data } = await api.post("/api/auth/signup", { email, password });
-  return data;
-}
-
-export async function resendOtp(email) {
-  const { data } = await api.post("/api/auth/resend-otp", { email });
-  return data;
-}
-
-export async function verifyOtp(email, otp) {
-  const { data } = await api.post("/api/auth/verify-otp", { email, otp });
   return data;
 }
 

@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
 import models  # noqa: F401 (registers models with Base before create_all)
-from routers import upload, dashboard, history, cleaning, ai_assistant, analysis
+from routers import upload, dashboard, history, cleaning, ai_assistant, analysis, auth
 
 Base.metadata.create_all(bind=engine)
 
@@ -26,6 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(upload.router)
 app.include_router(dashboard.router)
 app.include_router(history.router)

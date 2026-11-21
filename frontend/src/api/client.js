@@ -4,6 +4,12 @@ export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000",
 });
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("auth_token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
 export async function signup(email, password) {
   const { data } = await api.post("/api/auth/signup", { email, password });
   return data;
@@ -11,6 +17,25 @@ export async function signup(email, password) {
 
 export async function login(email, password) {
   const { data } = await api.post("/api/auth/login", { email, password });
+  return data;
+}
+
+export async function getProfile() {
+  const { data } = await api.get("/api/auth/me");
+  return data;
+}
+
+export async function updateProfile(name) {
+  const { data } = await api.put("/api/auth/profile", { name });
+  return data;
+}
+
+export async function uploadAvatar(file) {
+  const form = new FormData();
+  form.append("file", file);
+  const { data } = await api.post("/api/auth/avatar", form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return data;
 }
 
@@ -102,4 +127,8 @@ export function exportDatasetUrl(datasetId, filters = {}) {
     Object.fromEntries(Object.entries(filters).filter(([, v]) => v))
   ).toString();
   return `${api.defaults.baseURL}/api/dashboard/${datasetId}/export${params ? `?${params}` : ""}`;
+}
+
+export function avatarUrl(path) {
+  return path ? `${api.defaults.baseURL}${path}` : null;
 }

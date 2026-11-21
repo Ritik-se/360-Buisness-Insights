@@ -4,6 +4,8 @@ __pycache__/
 backend/business_insights.db
 backend/uploads/
 uploads/
+backend/avatars/
+avatars/
 node_modules/
 frontend/dist/
 .DS_Store

@@ -788,3 +788,54 @@ def data_quality_score(df: pd.DataFrame) -> dict:
         "formula": "Average of completeness (non-missing cells), uniqueness (non-duplicate rows), "
                    "validity (cells matching expected type) and consistency (stable type per column), each 0-100.",
     }
+
+
+def _relative_error(predicted: pd.Series, actual: pd.Series) -> Optional[float]:
+    valid = actual.notna() & predicted.notna() & (actual != 0)
+    if valid.sum() < 10:
+        return None
+    return float(((predicted[valid] - actual[valid]).abs() / actual[valid].abs()).mean())
+
+
+def detect_derived_metrics(df: pd.DataFrame, tags: Dict[str, dict]) -> Dict[str, dict]:
+    """Finds metric columns that are an exact (or near-exact) function of other
+    metric columns already in the dataset — e.g. Sales = Quantity x Unit Price
+    x (1 - Discount/100) — purely by testing candidate formulas against the
+    real data, with no column names ever hardcoded. A column found to be
+    derived this way should be recalculated from its drivers during a what-if
+    simulation rather than scaled by its own independent percentage, so the
+    simulation stays internally consistent (e.g. raising Unit Price actually
+    raises Sales, instead of requiring the user to separately guess a matching
+    Sales percentage)."""
+    metric_cols = [c for c, t in tags.items() if t["role"] in ("metric", "currency_metric", "count_metric", "rating_metric")]
+    if len(metric_cols) < 3:
+        return {}
+
+    numeric = {c: pd.to_numeric(df[c], errors="coerce") for c in metric_cols}
+    TOLERANCE = 0.01  # 1% mean relative error - real formulas are near-exact; noisy coincidences are not
+    derived: Dict[str, dict] = {}
+
+    for target in metric_cols:
+        best = None
+        others = [c for c in metric_cols if c != target]
+        for i, a in enumerate(others):
+            for b in others[i + 1:]:
+                base_pred = numeric[a] * numeric[b]
+                err = _relative_error(base_pred, numeric[target])
+                if err is not None and err < TOLERANCE and (best is None or err < best["error"]):
+                    best = {"drivers": [a, b], "kind": "product", "factor_col": None, "error": err,
+                            "formula": f"{a} × {b}"}
+                for factor_col in others:
+                    if factor_col in (a, b):
+                        continue
+                    factor = numeric[factor_col]
+                    for sign, label in ((-1, "1 −"), (1, "1 +")):
+                        pred = base_pred * (1 + sign * factor / 100)
+                        err = _relative_error(pred, numeric[target])
+                        if err is not None and err < TOLERANCE and (best is None or err < best["error"]):
+                            best = {"drivers": [a, b], "kind": "product_with_rate", "factor_col": factor_col,
+                                    "factor_sign": sign, "error": err,
+                                    "formula": f"{a} × {b} × ({label} {factor_col}%)"}
+        if best:
+            derived[target] = best
+    return derived

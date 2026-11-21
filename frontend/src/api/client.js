@@ -112,6 +112,11 @@ export async function getRootCause(datasetId, metric) {
   return data;
 }
 
+export async function getDerivedMetrics(datasetId) {
+  const { data } = await api.get(`/api/dashboard/${datasetId}/derived-metrics`);
+  return data;
+}
+
 export async function simulateWhatIf(datasetId, adjustments) {
   const { data } = await api.post(`/api/dashboard/${datasetId}/simulate`, { adjustments });
   return data;

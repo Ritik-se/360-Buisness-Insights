@@ -86,6 +86,16 @@ def get_chart_options(dataset_id: int, db: Session = Depends(get_db)):
     return semantic_engine.available_chart_options(tags)
 
 
+@router.get("/dashboard/{dataset_id}/derived-metrics")
+def get_derived_metrics(dataset_id: int, db: Session = Depends(get_db)):
+    dataset = db.query(Dataset).filter(Dataset.id == dataset_id).first()
+    if not dataset or not dataset.stored_path:
+        raise HTTPException(status_code=404, detail="Dataset not found.")
+    df, tags, _, _ = _load_and_filter(dataset, None, None, None, None)
+    derived = semantic_engine.detect_derived_metrics(df, tags)
+    return {col: {"formula": info["formula"], "drivers": info["drivers"]} for col, info in derived.items()}
+
+
 @router.post("/dashboard/{dataset_id}/custom-chart")
 def custom_chart(dataset_id: int, body: dict = Body(...), db: Session = Depends(get_db)):
     dataset = db.query(Dataset).filter(Dataset.id == dataset_id).first()

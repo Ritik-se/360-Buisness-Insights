@@ -1,0 +1,17 @@
+Order Date,Sales,Profit,Region,Category,Product
+2025-01-05,1200,180,North,Electronics,Wireless Earbuds
+2025-01-18,950,110,South,Apparel,T-Shirt
+2025-02-02,1800,340,North,Electronics,Smart Watch
+2025-02-14,700,90,East,Home,Blender
+2025-02-27,1100,150,West,Apparel,Jeans
+2025-03-03,2100,410,North,Electronics,Laptop Stand
+2025-03-15,650,70,South,Home,Mixer
+2025-03-29,1300,210,East,Electronics,Headphones
+2025-04-04,1750,330,North,Apparel,Jacket
+2025-04-19,900,120,West,Home,Toaster
+2025-05-02,2200,450,North,Electronics,Monitor
+2025-05-16,1150,160,South,Apparel,Shoes
+2025-05-28,800,95,East,Home,Kettle
+2025-06-01,2600,510,North,Electronics,Tablet
+2025-06-14,1000,140,West,Apparel,Hoodie
+2025-06-25,750,85,South,Home,Fan

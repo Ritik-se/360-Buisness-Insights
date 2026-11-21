@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.env
+backend/business_insights.db
+backend/uploads/
+uploads/
+node_modules/
+frontend/dist/
+.DS_Store
+
+# stale leftover copies from an earlier directory move, not part of the live app
+/business-insights-360/
+/frontend 2/
+/*.csv
+/ui-prototype.html
